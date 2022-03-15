@@ -9,7 +9,7 @@ def load_graph_features(G, action, state, delta_state, bs = 1, norm = True, nois
     else:
         pos_noise = 0
 
-
+    # print("pos", type(pos),"pos_noise", type(pos_noise) )
     pos += pos_noise
     if noise > 0:
         delta_state[:, 5:5+18] -= pos_noise.view(-1, 18)

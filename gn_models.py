@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import torch.nn as nn
 import torch.optim as optim
 from utils import *
-
+import pdb
 
 _node_feat_size = 128
 _edge_feat_size = 128
@@ -74,12 +74,13 @@ class GNBlock(nn.Module):
         
         
     def forward(self, x):
+        # pdb.set_trace()
         bs = x.graph['feat'].size(0)
         #edge update
         for u,v in x.edges():
             g = x.graph['feat']
-            ns = x.node[u]['feat']
-            nr = x.node[v]['feat']
+            ns = x.nodes[u]['feat']
+            nr = x.nodes[v]['feat']
             e = x[u][v]['feat']
             x[u][v]['temp_feat'] = self.edge_block(g, ns, nr, e)
             
@@ -89,17 +90,17 @@ class GNBlock(nn.Module):
         #node update
         for u in x.nodes():
             g = x.graph['feat']
-            n = x.node[u]['feat']
+            n = x.nodes[u]['feat']
             pred = list(x.predecessors(u))
             n_e_agg = torch.zeros(bs, self.edge_feat_size)
             if x.graph['feat'].is_cuda:
                 n_e_agg = n_e_agg.cuda()
             for v in pred:
                 n_e_agg += x[v][u]['feat']
-            x.node[u]['temp_feat'] = self.node_block(g, n, n_e_agg)
+            x.nodes[u]['temp_feat'] = self.node_block(g, n, n_e_agg)
         
         for u in x.nodes():
-            x.node[u]['feat'] = x.node[u]['temp_feat']
+            x.nodes[u]['feat'] = x.nodes[u]['temp_feat']
          
         #graph update
         e_agg = torch.zeros(bs, self.edge_feat_size)
@@ -111,7 +112,7 @@ class GNBlock(nn.Module):
         for u,v in x.edges():
             e_agg += x[u][v]['feat']
         for u in x.nodes():
-            n_agg += x.node[u]['feat']
+            n_agg += x.nodes[u]['feat']
         g = x.graph['feat']
         x.graph['feat'] = self.graph_block(g, n_agg, e_agg)
         

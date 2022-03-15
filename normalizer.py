@@ -9,23 +9,24 @@ from tensorboardX import SummaryWriter
 from datetime import datetime
 import os
 from tqdm import tqdm
-from dataset import SwimmerDataset
-from utils import *
+# from dataset import SwimmerDataset
+# from utils import *
+from dataset3 import SwimmerDataset
+from util2 import *
 
 if __name__ == "__main__":
-    dset = SwimmerDataset('swimmer.npy')
+    dset = SwimmerDataset('swimmer3.npy',3)
     use_cuda = True
     dl = DataLoader(dset, batch_size=200, num_workers=0, drop_last=True)
-    G1 = nx.path_graph(6).to_directed()
-    #nx.draw(G1)
-    #plt.show()
+    G1 = nx.path_graph(3).to_directed()
+    nx.draw(G1)
+    plt.show()
     node_feat_size = 6
     edge_feat_size = 3
     graph_feat_size = 10
     gn = FFGN(graph_feat_size, node_feat_size, edge_feat_size).cuda()
     optimizer = optim.Adam(gn.parameters(), lr = 1e-3)
-    savedir = os.path.join('./logs','runs',
-        datetime.now().strftime('%B%d_%H:%M:%S'))
+    savedir = os.path.join('./logs','runs', datetime.now().strftime('%B%d_%H:%M:%S'))
     writer = SummaryWriter(savedir)
     step = 0
 
@@ -59,4 +60,4 @@ if __name__ == "__main__":
             load_graph_features(G1, action, delta_state, bs=200)
             out_normalizer.normalize(G1)
     '''
-    torch.save({"in_normalizer":in_normalizer, "out_normalizer":out_normalizer}, 'normalize.pth')
+    torch.save({"in_normalizer":in_normalizer, "out_normalizer":out_normalizer}, 'normalize3.pth')

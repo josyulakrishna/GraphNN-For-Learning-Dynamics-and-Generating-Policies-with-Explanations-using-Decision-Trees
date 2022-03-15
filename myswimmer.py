@@ -41,6 +41,24 @@ _CONTROL_TIMESTEP = .02  # (Seconds)
 SUITE = containers.TaggedTasks()
 
 
+import torch.utils.data as data
+from torch.utils.data import DataLoader
+import numpy as np
+import networkx as nx
+import torch.optim as optim
+import matplotlib.pyplot as plt
+from gn_models import init_graph_features, FFGN
+import torch
+from tensorboardX import SummaryWriter
+from datetime import datetime
+import os
+import sys
+from scipy.stats import pearsonr
+from train_gn import SwimmerDataset
+from utils import *
+import argparse
+
+
 def get_model_and_assets(n_joints):
   """Returns a tuple containing the model XML string and a dict of assets.
 
@@ -79,8 +97,7 @@ def _make_swimmer(n_joints, time_limit=_DEFAULT_TIME_LIMIT, random=None):
   model_string, assets = get_model_and_assets(n_joints)
   physics = Physics.from_xml_string(model_string, assets=assets)
   task = Swimmer(random=random)
-  return control.Environment(
-      physics, task, time_limit=time_limit, control_timestep=_CONTROL_TIMESTEP)
+  return control.Environment(physics, task, time_limit=time_limit, control_timestep=_CONTROL_TIMESTEP)
 
 
 def _make_model(n_bodies):
@@ -222,8 +239,9 @@ class Swimmer(base.Task):
     physics.named.model.light_pos['target_light', 'x'] = xpos
     physics.named.model.light_pos['target_light', 'y'] = ypos
 
-  def get_observation(self, physics):
+  def get_observation(self, physics, action):
     """Returns an observation of joint angles, body velocities and target."""
+    print("in swimmer", action)
     obs = collections.OrderedDict()
     obs['joints'] = physics.joints()
     obs['to_target'] = physics.nose_to_target()
@@ -238,3 +256,74 @@ class Swimmer(base.Task):
                              bounds=(0, target_size),
                              margin=5*target_size,
                              sigmoid='long_tail')
+
+  def before_step(self, action, physics):
+    print("called before step")
+    # true joint angle + abs position
+    G1 = nx.path_graph(6).to_directed()
+
+    obs = self.get_observation(physics)
+
+    state = np.zeros((41,))
+    state[:5] = obs["joints"]
+    state[5:5 + 18] = obs["body_velocities"]
+    state[5 + 18 + 1:] = obs["abs"]
+
+    delta_state = np.zeros((41,))
+    last_state = np.zeros((41,))
+
+    normalizers = torch.load('normalize.pth')
+    in_normalizer = normalizers['in_normalizer']
+    out_normalizer = normalizers['out_normalizer']
+    std = in_normalizer.get_std()
+    node_feat_size = 6
+    edge_feat_size = 3
+    graph_feat_size = 10
+    gn = FFGN(graph_feat_size, node_feat_size, edge_feat_size).cuda()
+    gn.load_state_dict(torch.load("model_trained.pth"))
+    G_out = gn(in_normalizer.normalize(G1))
+    use_cuda = True
+    if use_cuda:
+      action, delta_state, last_state = action.cuda(), delta_state.cuda(), last_state.cuda()
+    init_graph_features(G1, graph_feat_size, node_feat_size, edge_feat_size, cuda=True, bs=200)
+    load_graph_features(G1, action, last_state, delta_state, bs=200, noise=0.03, std=std)
+    G_out = gn(in_normalizer.normalize(G1))
+    G_out = out_normalizer.inormalize(G_out)
+
+    pred_state = []
+    pred_joint = []
+    for node in G_out.nodes():
+      pred_state.append(G_out.nodes[node]['feat'][:, :3])
+    for edge in G_out.edges():
+      pred_joint.append(G_out[edge[0]][edge[1]]['feat'][:,0])
+    print(pred_joint.shape)
+    print(pred_state.shape)
+
+################### CUSTOM GYM Wrapper ###########################
+import gym
+from gym import spaces
+#
+# class SwimmerEnv(gym.Env):
+#   """Custom Environment that follows gym interface"""
+#   metadata = {'render.modes': ['human']}
+#
+#   def __init__(self, arg1, arg2, ...):
+#     super(SwimmerEnv, self).__init__()
+#     # Define action and observation space
+#     # They must be gym.spaces objects
+#     # Example when using discrete actions:
+#     self.action_space = spaces.Box(low=[], high=, shape=)
+#     # Example for using image as input:
+#     self.observation_space = spaces.Box(low=0, high=255,
+#                                         shape=(HEIGHT, WIDTH, N_CHANNELS), dtype=np.uint8)
+#
+#   def step(self, action):
+#
+#     return observation, reward, done, info
+#   def reset(self):
+#     ...
+#     return observation  # reward, done, info can't be included
+#   def render(self, mode='human'):
+#     ...
+#   def close (self):
+#     ...

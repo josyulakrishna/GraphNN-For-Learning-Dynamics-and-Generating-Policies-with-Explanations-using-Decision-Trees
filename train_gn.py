@@ -9,29 +9,33 @@ import torch
 from tensorboardX import SummaryWriter
 from datetime import datetime
 import os
-from dataset import SwimmerDataset
-from utils import *
+# from dataset import SwimmerDataset
+# from utils import *
+from dataset3 import SwimmerDataset
+from util2 import *
 from tqdm import tqdm
 import argparse
 
 if __name__ == "__main__":
-
+    n_nodes=3
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', type=str, default = '',  help='model path')
     opt = parser.parse_args()
-    print(opt)
-
-    dset = SwimmerDataset('swimmer.npy')
-    dset_eval = SwimmerDataset('swimmer_test.npy')
+    # print(opt)
+    dset = SwimmerDataset('swimmer3.npy',n_nodes)
+    dset_eval = SwimmerDataset('swimmer3_eval.npy',n_nodes)
     use_cuda = True
 
     dl = DataLoader(dset, batch_size=200, num_workers=0, drop_last=True)
     dl_eval = DataLoader(dset_eval, batch_size=200, num_workers=0, drop_last=True)
 
-    G1 = nx.path_graph(6).to_directed()
-    G_target = nx.path_graph(6).to_directed()
-    #nx.draw(G1)
-    #plt.show()
+    G1 = nx.path_graph(n_nodes).to_directed()
+    G_target = nx.path_graph(n_nodes).to_directed()
+    nx.draw(G1)
+    plt.show()
+    # node_feat_size = 6
+    # edge_feat_size = 3
+    # graph_feat_size = 10
     node_feat_size = 6
     edge_feat_size = 3
     graph_feat_size = 10
@@ -45,7 +49,6 @@ if __name__ == "__main__":
         datetime.now().strftime('%B%d_%H:%M:%S'))
     writer = SummaryWriter(savedir)
     step = 0
-
     normalizers = torch.load('normalize.pth')
     in_normalizer = normalizers['in_normalizer']
     out_normalizer = normalizers['out_normalizer']
@@ -60,7 +63,7 @@ if __name__ == "__main__":
                 action, delta_state, last_state = action.cuda(), delta_state.cuda(), last_state.cuda()
 
             init_graph_features(G1, graph_feat_size, node_feat_size, edge_feat_size, cuda=True, bs = 200)
-            load_graph_features(G1, action, last_state, delta_state,bs=200, noise = 0.02, std = std)
+            load_graph_features(G1, action, last_state, delta_state,bs=200, noise = 0, std = std)
             G_out = gn(in_normalizer.normalize(G1))
 
             init_graph_features(G_target, graph_feat_size, node_feat_size, edge_feat_size, cuda=True, bs=200)
