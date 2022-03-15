@@ -47,5 +47,5 @@ TD3 has worked the best for us with an mean reward of 218
 # Explanations
 
 The policy explanation is attempted by  building a decision tree of optimal policy and model policy. The details are given in 
-"explainPolicy.ipynb"  
+"explainDynamics.ipynb" and "explainPolicy.ipynb"  
 
