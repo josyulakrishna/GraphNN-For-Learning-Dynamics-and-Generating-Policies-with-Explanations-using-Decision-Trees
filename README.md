@@ -24,9 +24,12 @@ Normalise the data using "normalizer.py" a pre-generated file is given here "nor
 
 ## Train GN
 
+Change line 12 in train_gn.py to be from dataset import SwimmerDataset
+
 `python train_gn.py` to train the model. The learning rate schedule corresponds to "fast training" in original paper.
 
 ## Evaluate GN
+Change line 14 in evaluate_gn.py to be from dataset import SwimmerDataset
 
 `python evaluate_gn.py <model path>`
 
@@ -46,6 +49,15 @@ TD3 has worked the best for us with an mean reward of 218
 
 # Explanations
 
+Using a set of observations we predict the angle the angle of the head using the decision trees predictions.
+
+Change line 12 in train_gn.py to be from testdataset import SwimmerDataset
+Change line 14 in evaluate_gn.py to be from testdataset import SwimmerDataset
+
 The policy explanation is attempted by  building a decision tree of optimal policy and model policy. The details are given in 
-"explainPolicy.ipynb"  
+"explainDynamics.ipynb" and "explainPolicy.ipynb"  
+
+![decision tree for model predictions](misc/initialTree.png)
+
+![decision tree for optimal actions](misc/finalTree.png)
 

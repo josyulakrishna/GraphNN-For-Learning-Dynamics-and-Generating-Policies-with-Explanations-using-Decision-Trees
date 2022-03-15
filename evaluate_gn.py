@@ -11,7 +11,8 @@ from datetime import datetime
 import os
 import sys
 from scipy.stats import pearsonr
-from train_gn import SwimmerDataset
+from testdataset import SwimmerDataset
+#while training change to from dataset import SwimmerDataset
 from utils import *
 import argparse
 

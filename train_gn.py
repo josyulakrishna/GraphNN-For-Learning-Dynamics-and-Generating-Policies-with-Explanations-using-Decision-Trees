@@ -9,9 +9,11 @@ import torch
 from tensorboardX import SummaryWriter
 from datetime import datetime
 import os
-# from dataset import SwimmerDataset
+from testdataset import SwimmerDataset
+#while training change to from dataset import SwimmerDataset
+
 # from utils import *
-from dataset3 import SwimmerDataset
+#from dataset3 import SwimmerDataset
 from util2 import *
 from tqdm import tqdm
 import argparse
