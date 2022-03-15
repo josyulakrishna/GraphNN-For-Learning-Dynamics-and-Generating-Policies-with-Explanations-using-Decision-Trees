@@ -4,7 +4,7 @@ Based on the original Repository at  https://github.com/fxia22/gn.pytorch/
 - The project learns the dynamics of the agent by using the Graph Neural Networks [Graph networks as learnable physics engines for inference and control](https://arxiv.org/abs/1806.01242).
 - The learned GNN Model is integrated into the Deep Mind Control Suite to learn a policy for reaching the goal, please replace your original dm_control package with the files from dm_control_mod  
 
-- The iPython Notebook named "explainPolicy.ipynb" contains information regarding generating the decision trees for policy explanation. 
+- The code for explanation is contained in the explanations folder the files contain instructions for generating the decision trees for policy. Please look into "explainPolicy.ipynb" and "explainDynamics.ipynb"
 
 - Models and files are named _swimmer3 for all swimmer3 trained policies and gnn models and the data sets 
 
