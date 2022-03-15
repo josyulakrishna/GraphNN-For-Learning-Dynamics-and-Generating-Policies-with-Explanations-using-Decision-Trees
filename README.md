@@ -42,7 +42,7 @@ TD3 has worked the best for us with an mean reward of 218
 ![TD3 reward for swimmer3](misc/td3.png)
 
 # Demo of swimmer3 moving 
-![TD3 demo](misc/td3.mp4)
+![TD3 demo](misc/td3.gif)
 
 # Explanations
 
