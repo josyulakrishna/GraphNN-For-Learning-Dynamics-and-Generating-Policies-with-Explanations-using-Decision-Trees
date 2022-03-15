@@ -1,0 +1,4 @@
+Timesteps = 110000 
+Accuracy = 0.04
+Precision = 0.0211864406779661
+Recall = 0.35714285714285715
