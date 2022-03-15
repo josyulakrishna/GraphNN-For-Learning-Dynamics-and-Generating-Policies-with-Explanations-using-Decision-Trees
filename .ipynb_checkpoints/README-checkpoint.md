@@ -57,7 +57,7 @@ Change line 14 in evaluate_gn.py to be from testdataset import SwimmerDataset
 The policy explanation is attempted by  building a decision tree of optimal policy and model policy. The details are given in 
 "explainDynamics.ipynb" and "explainPolicy.ipynb"  
 
-![decision tree for model predictions](misc/initialTree-110000.png)
+![decision tree for model predictions](misc/initialTree.png)
 
-![decision tree for optimal actions](misc/optimalTree-110000.png)
+![decision tree for optimal actions](misc/optimalTree.png)
 
